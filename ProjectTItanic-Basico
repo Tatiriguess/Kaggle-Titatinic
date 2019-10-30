@@ -1,0 +1,34 @@
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+train = pd.read_csv ('train.csv')
+test  = pd.read_csv ('test.csv')
+train.head()
+#retirando colunas com nome, ingresso e cabinedos conjuntos
+train.drop (['Name','Ticket','Cabin'],axis=1,inplace=True)
+test.drop (['Name','Ticket','Cabin'],axis=1,inplace=True)
+#criação de novo DataFrame a partir do One Hot enconding
+new_data_train = pd.get_dummies(train)
+new_data_test=pd.get_dummies(test)
+#primeiro linhas do novo dataset de test
+new_data_test.head()
+new_data_train.head()
+# Qunatidade de valores nulos no conjunto de treino 
+new_data_train.isnull().sum().sort_values(ascending=False).head(10)
+#Preenchimento valores nulos
+new_data_train['Age'].fillna(new_data_train['Age'].mean(),inplace=True)
+new_data_test['Age'].fillna(new_data_test['Age'].mean(),inplace=True)
+# Qunatidade de valores nulos no conjunto de treino 
+new_data_test.isnull().sum().sort_values(ascending=False).head(10)
+#Preenchimento valores nulos
+new_data_test['Fare'].fillna(new_data_test['Fare'].mean(),inplace=True)
+#Separando features e target para criação do modelo
+x= new_data_train.drop('Survived',axis=1)
+y = new_data_train['Survived']
+#Criação do modelo
+tree = DecisionTreeClassifier(max_depth=3,random_state=0)
+tree.fit(x,y)
+#Verificando score no conjunto 
+tree.score(x,y)
+submission = pd.DataFrame()
+submission['PassengerId']= new_data_test['PassengerId']
+submission['Survived'] = tree.predict( new_data_test)
